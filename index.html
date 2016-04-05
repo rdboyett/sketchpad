@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Raphael SketchPad</title>
+
+	<meta charset="UTF-8"/>
+	<meta http-equiv="content-language" content="en">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+	<!-- Blueprint CSS -->
+<link rel="stylesheet" href="stylesheets/screen.css" type="text/css" media="screen, projection">
+	<link rel="stylesheet" href="stylesheets/print.css" type="text/css" media="print">
+	<link rel="stylesheet" href="stylesheets/wColorPicker.min.css" type="text/css">
+
+	<style type="text/css">
+		html, body {
+			background:#fff;
+		}
+		a,
+		a:hover,
+		a:visited {
+			color:#1D72C2;
+		}
+		#hd {
+			margin-top:40px;
+		}
+			#hd h1 {
+				font-weight:bold;
+				letter-spacing:-0.05em;
+			}
+			#hd a#download {
+				display:block;
+				padding:5px;
+				font-size:24px;
+				font-weight:bold;
+				text-align:center;
+				text-decoration:none;
+				background-color:#D4ECFF;
+				border:1px solid #57B6FF;
+			}
+		#bd {
+			margin-bottom:40px;
+		}
+			#bd h2,
+			#bd h3 {
+				font-weight:bold;
+				letter-spacing:-0.05em;
+			}
+
+			#bd pre.code {
+				margin-top:0;
+				padding:5px;
+				background-color:#eee;
+			}
+			#bd .sample {
+				float:right;
+				margin-left:10px;
+			}
+			#bd div.widget {
+				background-color:#ffc;
+				border:1px solid #ccc;
+			}
+			/* Reference section */
+			#bd .reference code {
+				margin:0 10px;
+			}
+
+			.widget_actions div {
+				cursor:pointer;
+				margin:4px 0 0;
+				color:#1D72C2;
+				background-color:#D4ECFF;
+				border:1px solid #57B6FF;
+				text-align:center;
+				text-decoration:none;
+			}
+				.widget_actions div.disabled {
+					text-decoration:none;
+					color:#666;
+					background-color:#eee;
+					border:1px solid #ccc;
+				}
+				.widget_actions div.selected {
+					font-weight:bold;
+				}
+				.widget_actions div._title {
+					cursor:default;
+					color:#666;
+					background-color:transparent;
+					border-color:transparent;
+				}
+	</style>
+
+	<!-- Javascripts -->
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+	
+<div class="container">
+	<!--==================== Body ====================-->
+	<div id="bd" class="span-24">
+		<!--
+		<div class="span-24">
+			<h3>Projects using Raphael SketchPad</h3>
+			<ul>
+				<li><a href="http://infinitepanorama.com/">Infinite Panorama</a></li>
+			</ul>
+		</div>
+		-->
+
+		<h2 class="clear">How It Works</h2>
+
+		<div class="span-8">
+			<h3>Editor</h3>
+			<p>
+				Draw a sketch below.
+			</p>
+			<div style="height:260px;" class="widget">
+				<div id="sketchpad_editor"></div>
+			</div>
+		</div>
+
+		<div class="span-8">
+			<h3>Result</h3>
+			<p>
+				The sketch is stored as JSON in an input field.
+			</p>
+			<form action="" method="post" onsubmit="return false;">
+				<textarea id="input1" name="input1" style="margin:0;width:250px;height:250px;"></textarea>
+			</form>
+		</div>
+
+		<div class="span-8 last">
+			<h3>Viewer</h3>
+			<p>
+				<a href="javascript:void(0);" id="update_sketchpad_viewer">Click</a>
+				to display the JSON data in the viewer.
+			</p>
+			<div style="height:260px;" class="widget">
+				<div id="sketchpad_viewer"></div>
+			</div>
+		</div>
+                
+                <div class="span-8">
+                    <button id="editor_undo" type="button">undo</button>
+                    <button id="editor_redo" type="button">redo</button>
+                    <button id="editor_clear" type="button">clear</button>
+                    <button id="editor_solid" type="button">pen</button>
+                    <button id="editor_fuzzy" type="button">highlighter</button>
+                    <button id="pen" type="button">pen width</button>
+                    <button id="editor_draw" type="button">Draw</button>
+                    <button id="editor_erase" type="button">Erase</button>
+                    <button id="color" type="button">color</button>
+                    <button id="textCreate" type="button">text</button>
+                    <button id="select" type="button">pointer</button>
+                </div>
+
+	<script type="text/javascript" src="javascripts/raphael-2.0.1.js"></script>
+	<script type="text/javascript" src="javascripts/json2.min.js"></script>
+	<script type="text/javascript" src="javascripts/raphael.sketchpad.js"></script>
+	<script type="text/javascript" src="javascripts/wColorPicker.js"></script>
+	<script type="text/javascript" src="javascripts/textEdit.js"></script>
+        <script type="text/javascript" src="javascripts/dragonDelete.js"></script>
+        
+	<script type="text/javascript">
+			$(document).ready(function() {
+				var strokes = [];
+                                var sketchpad_editor = Raphael.sketchpad("sketchpad_editor", {
+					width: 260,
+					height: 260,
+					editing: true,	// true is default
+					strokes: strokes,
+                                        imageURL: "img/workBoxImage9.jpg"
+				});
+				sketchpad_editor.change(function() {
+					$("#input1").val(sketchpad_editor.json());
+                                        update_actions();
+				});
+
+				var sketchpad_viewer = Raphael.sketchpad("sketchpad_viewer", {
+					width: 260,
+					height: 260,
+					editing: false,
+                                        imageURL: "img/workBoxImage9.jpg"
+				});
+
+				$("#update_sketchpad_viewer").click(function() {
+					sketchpad_viewer.json($('#input1').val());
+				});
+                                
+                                
+                                
+		function enable(element, enable) {
+			if (enable) {
+				$(element).removeClass("disabled");
+			} else {
+				$(element).addClass("disabled");
+			}
+		};
+                                
+                                
+		$("#editor_undo").click(function() {
+			sketchpad_editor.undo();
+		});
+		$("#editor_redo").click(function() {
+			sketchpad_editor.redo();
+		});
+		$("#editor_clear").click(function() {
+			sketchpad_editor.clear();
+		});
+    
+		$("#editor_solid").click(function() {
+			sketchpad_editor.pen().opacity(1);
+		});
+		$("#editor_fuzzy").click(function() {
+			sketchpad_editor.pen().opacity(0.3);
+		});
+		$("#editor_erase").click(function() {
+			sketchpad_editor.editing("erase");
+		});
+                $("#editor_draw").click(function() {
+			sketchpad_editor.editing(true);
+		});
+                
+                $("#textCreate").click(function(){
+                    sketchpad_editor.editing("text");
+                });
+                
+                $("#select").click(function(){
+                    sketchpad_editor.editing("select");
+                });
+
+		function update_actions() {
+			enable("#editor_undo", sketchpad_editor.undoable());
+			enable("#editor_redo", sketchpad_editor.redoable());
+			enable("#editor_clear", sketchpad_editor.strokes().length > 0);
+		}
+
+		//sketchpad_editor.change(update_actions);
+
+		update_actions();
+                                
+                                
+                                
+                                
+            $("#color").wColorPicker({
+                theme           : 'classic',  // set theme
+                opacity         : 0.8,        // opacity level
+                color           : '#000',  // set init color
+                mode            : 'click',     // mode for palette (flat, hover, click)
+                position        : 'br',       // position of palette, (tl, tc, tr, rt, rm, rb, br, bc, bl, lb, lm, lt)
+                generateButton  : false,       // if mode not flat generate button or not
+                dropperButton   : true,      // optional dropper button to use in other apps
+                effect          : 'fade',    // only used when not in flat mode (none, slide, fade)
+                showSpeed       : 500,        // show speed for effects
+                hideSpeed       : 500,        // hide speed for effects
+                onMouseover     : null,       // callback for color mouseover
+                onMouseout      : null,       // callback for color mouseout
+                onSelect        : function(color){sketchpad_editor.pen().color(color);},       // callback for color when selected
+                onDropper       : null        // callback when dropper is clicked
+            });
+			});
+		</script>
+
+        </div>
+
+
+</div>
+
+</body>
+</html>
